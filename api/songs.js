@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     // ==========================
     // Google Sheets API 設定
     // ==========================
-    const spreadsheetId = process.env.SPREADSHEET_ID; // Vercel の Environment Variables に設定
+    const spreadsheetId = "17meNocmInqv0vbbj6PeCUnsgvSSGqgoZpv0QpCQBG_I"; // Vercel の Environment Variables に設定
     const range = "Sheet1!B2:K1000";
     const apiKey = process.env.GOOGLE_API_KEY;
 
