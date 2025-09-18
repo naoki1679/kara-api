@@ -1,11 +1,9 @@
-// songs.js
-import fetch from "node-fetch"; // Vercel Node で fetch が使えない場合
-
+// import fetch は Node 18 以降不要
 export default async function handler(req, res) {
   // ==========================
   // CORS 設定
   // ==========================
-  res.setHeader("Access-Control-Allow-Origin", "*"); // すべてのオリジンからアクセス可能
+  res.setHeader("Access-Control-Allow-Origin", "*"); // 全オリジン許可
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
@@ -19,17 +17,27 @@ export default async function handler(req, res) {
     // ==========================
     // Google Sheets API 設定
     // ==========================
-    const spreadsheetId = "17meNocmInqv0vbbj6PeCUnsgvSSGqgoZpv0QpCQBG_I"; // Vercel の Environment Variables に設定
+    const spreadsheetId = "17meNocmInqv0vbbj6PeCUnsgvSSGqgoZpv0QpCQBG_I"; // 直接書き込み
+    const apiKey = process.env.GOOGLE_API_KEY; // APIキーのみ環境変数で管理
     const range = "Sheet1!B2:K1000";
-    const apiKey = process.env.GOOGLE_API_KEY;
+
+    if (!apiKey) {
+      console.error("Missing GOOGLE_API_KEY");
+      return res.status(500).json({ error: "Missing GOOGLE_API_KEY" });
+    }
 
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
     const response = await fetch(url);
+
+    if (!response.ok) {
+      console.error("Google Sheets API error:", response.status, response.statusText);
+      return res.status(500).json({ error: "Google Sheets API error" });
+    }
+
     const data = await response.json();
 
     if (!data.values) {
-      res.status(404).json({ error: "No data found" });
-      return;
+      return res.status(404).json({ error: "No data found" });
     }
 
     // ==========================
@@ -45,8 +53,9 @@ export default async function handler(req, res) {
     const sorted = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
 
     res.status(200).json(sorted);
+
   } catch (err) {
-    console.error("API Error:", err);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Serverless function exception:", err);
+    res.status(500).json({ error: err.message });
   }
 }
