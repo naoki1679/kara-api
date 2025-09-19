@@ -3,7 +3,15 @@ export default async function handler(req, res) {
   // ==========================
   // CORS 設定
   // ==========================
-  res.setHeader("Access-Control-Allow-Origin", "https://task-official.github.io"); // 全オリジン許可
+  const allowedOrigins = [
+  "http://localhost:5173",
+  "https://task-official.github.io"
+];
+
+const origin = req.headers.origin;
+if (allowedOrigins.includes(origin)) {
+  res.setHeader("Access-Control-Allow-Origin", origin);
+}
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
