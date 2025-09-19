@@ -17,9 +17,9 @@ export default async function handler(req, res) {
     // ==========================
     // Google Sheets API 設定
     // ==========================
-    const spreadsheetId = "17meNocmInqv0vbbj6PeCUnsgvSSGqgoZpv0QpCQBG_I"; // 直接書き込み
+    const spreadsheetId = "1k5VXL8UEXWZsYNSBw-6_u0f7Ic4MXu44xNDInFxAe4U"; // 直接書き込み
     const apiKey = process.env.GOOGLE_API_KEY; // APIキーのみ環境変数で管理
-    const range = "Sheet1!B2:K1000";
+    const range = "Sheet1!B2:U1000";
 
     if (!apiKey) {
       console.error("Missing GOOGLE_API_KEY");
