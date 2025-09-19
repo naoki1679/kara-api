@@ -48,19 +48,60 @@ if (allowedOrigins.includes(origin)) {
       return res.status(404).json({ error: "No data found" });
     }
 
-    // ==========================
-    // 曲の出現回数を集計
-    // ==========================
-    const counts = new Map();
-    data.values.flat().forEach((song) => {
-      const s = song?.trim();
-      if (s) counts.set(s, (counts.get(s) || 0) + 1);
+//     // ==========================
+//     // 曲の出現回数を集計
+//     // ==========================
+//     const counts = new Map();
+//     data.values.flat().forEach((song) => {
+//       const s = song?.trim();
+//       if (s) counts.set(s, (counts.get(s) || 0) + 1);
+//     });
+
+//     // 出現回数で降順ソート
+//     const sorted = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
+
+//     res.status(200).json(sorted);
+
+//   } catch (err) {
+//     console.error("Serverless function exception:", err);
+//     res.status(500).json({ error: err.message });
+//   }
+// }
+// ==========================================================
+    // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 変更箇所 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+    // ==========================================================
+    // 曲の出現回数を集計 (アーティスト名も考慮)
+    // ==========================================================
+    const songMap = new Map();
+    data.values.forEach((row) => {
+      // 2列ごと（アーティスト名、曲名）に処理
+      for (let i = 0; i < row.length; i += 2) {
+        const artist = row[i]?.trim();
+        const song = row[i + 1]?.trim();
+
+        if (artist && song) {
+          // アーティスト名と曲名をキーとして結合
+          const key = `${artist} - ${song}`;
+          if (songMap.has(key)) {
+            // 既にあればカウントを増やす
+            songMap.get(key).count++;
+          } else {
+            // なければ新規追加
+            songMap.set(key, { artist, song, count: 1 });
+          }
+        }
+      }
     });
 
-    // 出現回数で降順ソート
-    const sorted = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
+    // 出現回数で降順ソートし、[アーティスト名, 曲名, 回数] の配列に変換
+    const sorted = Array.from(songMap.values())
+      .sort((a, b) => b.count - a.count)
+      .map(item => [item.artist, item.song, item.count]);
 
     res.status(200).json(sorted);
+    // ==========================================================
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ 変更箇所 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+    // ==========================================================
 
   } catch (err) {
     console.error("Serverless function exception:", err);
